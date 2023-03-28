@@ -60,12 +60,10 @@ if %log_error%==true (
 
 goto :eof
 
-:process_file
-set /a "processed_files+=1"
-echo [%processed_files%/%total_files%] Processing file: "!audio_file!"
-
 set "start_time=%time%"
-whisper "!audio_file!" --model large-v2 --output_format vtt 2> nul
+for %%F in ("!audio_file!") do set "output_path=%%~dpF"
+set "output_path=%output_path:\=\\%"
+whisper "!audio_file!" --model medium.en --output_format vtt --output_dir "!output_path!" 2> nul
 
 if errorlevel 1 (
     echo Error: Failed to process "!audio_file!" using the whisper command.
