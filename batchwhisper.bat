@@ -28,22 +28,22 @@ set /a "processed_files=0"
 set /a "skipped_files=0"
 
 if /i "%include_subdirs%"=="yes" (
-    for /R %%A in (*.mp3;*.wav) do (
+    for /R %%A in (*.mp3;*.wav;*.m4a) do (
         set /a "total_files+=1"
     )
 ) else (
-    for %%A in (*.mp3;*.wav) do (
+    for %%A in (*.mp3;*.wav;*.m4a) do (
         set /a "total_files+=1"
     )
 )
 
 if /i "%include_subdirs%"=="yes" (
-    for /R %%A in (*.mp3;*.wav) do (
+    for /R %%A in (*.mp3;*.wav;*.m4a) do (
         set "audio_file=%%A"
         call :process_file
     )
 ) else (
-    for %%A in (*.mp3;*.wav) do (
+    for %%A in (*.mp3;*.wav;*.m4a) do (
         set "audio_file=%%A"
         call :process_file
     )
@@ -60,10 +60,14 @@ if %log_error%==true (
 
 goto :eof
 
+:process_file
+set /a "processed_files+=1"
+echo [%processed_files%/%total_files%] Processing file: "!audio_file!"
+
 set "start_time=%time%"
 for %%F in ("!audio_file!") do set "output_path=%%~dpF"
 set "output_path=%output_path:\=\\%"
-whisper "!audio_file!" --model medium.en --output_format vtt --output_dir "!output_path!" 2> nul
+whisper "!audio_file!" --model large-v2 --output_format vtt --output_dir "!output_path!" 2> nul
 
 if errorlevel 1 (
     echo Error: Failed to process "!audio_file!" using the whisper command.
@@ -71,6 +75,7 @@ if errorlevel 1 (
     set "log_error=true"
     goto :eof
 ) else (
+
     echo Successfully processed "!audio_file!".
 )
 
